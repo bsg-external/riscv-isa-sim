@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <queue>
 
 class processor_t;
 
@@ -72,6 +73,18 @@ class clint_t : public abstract_device_t {
   std::vector<processor_t*>& procs;
   mtime_t mtime;
   std::vector<mtimecmp_t> mtimecmp;
+};
+
+class host_t : public abstract_device_t {
+ public:
+  host_t(std::vector<processor_t*>&);
+  bool load(reg_t addr, size_t len, uint8_t* bytes);
+  bool store(reg_t addr, size_t len, const uint8_t* bytes);
+  void monitor();
+ private:
+  std::vector<processor_t*>& procs;
+  std::queue<reg_t> getchar_queue;
+  std::vector<bool> finish_signals;
 };
 
 #endif

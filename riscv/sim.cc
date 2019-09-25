@@ -45,6 +45,10 @@ sim_t::sim_t(const char* isa, size_t nprocs, bool halted, reg_t start_pc,
 
   clint.reset(new clint_t(procs));
   bus.add_device(CLINT_BASE, clint.get());
+
+  host_t* host = new host_t(procs);
+  hostModule.reset(host);
+  bus.add_device(HOST_BASE, hostModule.get());
 }
 
 sim_t::~sim_t()
