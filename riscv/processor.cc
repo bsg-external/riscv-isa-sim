@@ -328,19 +328,17 @@ void processor_t::set_csr(int which, reg_t val)
         mmu->flush_tlb();
 
       reg_t mask = MSTATUS_SIE | MSTATUS_SPIE | MSTATUS_MIE | MSTATUS_MPIE
-                 | MSTATUS_SPP | MSTATUS_FS | MSTATUS_MPRV | MSTATUS_SUM
-                 | MSTATUS_MPP | MSTATUS_MXR | MSTATUS_TW | MSTATUS_TVM
-                 | MSTATUS_TSR | MSTATUS_UXL | MSTATUS_SXL |
-                 (ext ? MSTATUS_XS : 0);
+                 | MSTATUS_SPP | MSTATUS_MPRV | MSTATUS_SUM
+                 | MSTATUS_MPP | MSTATUS_MXR  | MSTATUS_FS;
 
       state.mstatus = (state.mstatus & ~mask) | (val & mask);
 
-      bool dirty = (state.mstatus & MSTATUS_FS) == MSTATUS_FS;
-      dirty |= (state.mstatus & MSTATUS_XS) == MSTATUS_XS;
-      if (max_xlen == 32)
-        state.mstatus = set_field(state.mstatus, MSTATUS32_SD, dirty);
-      else
-        state.mstatus = set_field(state.mstatus, MSTATUS64_SD, dirty);
+      //bool dirty = (state.mstatus & MSTATUS_FS) == MSTATUS_FS;
+      //dirty |= (state.mstatus & MSTATUS_XS) == MSTATUS_XS;
+      //if (max_xlen == 32)
+      //  state.mstatus = set_field(state.mstatus, MSTATUS32_SD, dirty);
+      //else
+      //  state.mstatus = set_field(state.mstatus, MSTATUS64_SD, dirty);
 
       state.mstatus = set_field(state.mstatus, MSTATUS_UXL, xlen_to_uxl(max_xlen));
       state.mstatus = set_field(state.mstatus, MSTATUS_SXL, xlen_to_uxl(max_xlen));
@@ -388,8 +386,7 @@ void processor_t::set_csr(int which, reg_t val)
       state.mcounteren = val;
       break;
     case CSR_SSTATUS: {
-      reg_t mask = SSTATUS_SIE | SSTATUS_SPIE | SSTATUS_SPP | SSTATUS_FS
-                 | SSTATUS_XS | SSTATUS_SUM | SSTATUS_MXR;
+      reg_t mask = SSTATUS_SIE | SSTATUS_SPIE | SSTATUS_SPP | SSTATUS_SUM | SSTATUS_MXR | SSTATUS_FS;
       return set_csr(CSR_MSTATUS, (state.mstatus & ~mask) | (val & mask));
     }
     case CSR_SIP: {
