@@ -198,7 +198,6 @@ void processor_t::set_privilege(reg_t prv)
   assert(prv <= PRV_M);
   if (prv == PRV_H)
     prv = PRV_U;
-  mmu->flush_tlb();
   state.prv = prv;
 }
 
@@ -323,10 +322,6 @@ void processor_t::set_csr(int which, reg_t val)
       state.frm = (val & FSR_RD) >> FSR_RD_SHIFT;
       break;
     case CSR_MSTATUS: {
-      if ((val ^ state.mstatus) &
-          (MSTATUS_MPP | MSTATUS_MPRV | MSTATUS_SUM | MSTATUS_MXR))
-        mmu->flush_tlb();
-
       reg_t mask = MSTATUS_SIE | MSTATUS_SPIE | MSTATUS_MIE | MSTATUS_MPIE
                  | MSTATUS_SPP | MSTATUS_MPRV | MSTATUS_SUM
                  | MSTATUS_MPP | MSTATUS_MXR  | MSTATUS_FS;
@@ -397,7 +392,6 @@ void processor_t::set_csr(int which, reg_t val)
       return set_csr(CSR_MIE,
                      (state.mie & ~state.mideleg) | (val & state.mideleg));
     case CSR_SPTBR: {
-      mmu->flush_tlb();
       if (max_xlen == 32)
         state.sptbr = val & (SPTBR32_PPN | SPTBR32_MODE);
       if (max_xlen == 64 && (get_field(val, SPTBR64_MODE) == SPTBR_MODE_OFF ||
@@ -489,7 +483,7 @@ void processor_t::set_csr(int which, reg_t val)
   }
 }
 
-reg_t processor_t::get_csr(int which)
+reg_t processor_t::get_csr(int which, insn_t insn)
 {
   uint32_t ctr_en = -1;
   if (state.prv < PRV_M)
@@ -634,12 +628,12 @@ reg_t processor_t::get_csr(int which)
     case CSR_DSCRATCH:
       return state.dscratch;
   }
-  throw trap_illegal_instruction(0);
+  throw trap_illegal_instruction(insn.bits() & 0xffffffff);
 }
 
 reg_t illegal_instruction(processor_t* p, insn_t insn, reg_t pc)
 {
-  throw trap_illegal_instruction(0);
+  throw trap_illegal_instruction(insn.bits() & 0xffffffff);
 }
 
 insn_func_t processor_t::decode_insn(insn_t insn)
@@ -753,7 +747,6 @@ bool processor_t::store(reg_t addr, size_t len, const uint8_t* bytes)
 
 void processor_t::trigger_updated()
 {
-  mmu->flush_tlb();
   mmu->check_triggers_fetch = false;
   mmu->check_triggers_load = false;
   mmu->check_triggers_store = false;

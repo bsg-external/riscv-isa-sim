@@ -170,7 +170,7 @@ public:
   void reset();
   void step(size_t n); // run for n cycles
   void set_csr(int which, reg_t val);
-  reg_t get_csr(int which);
+  reg_t get_csr(int which, insn_t insn);
   mmu_t* get_mmu() { return mmu; }
   state_t* get_state() { return &state; }
   unsigned get_xlen() { return xlen; }
