@@ -9,8 +9,8 @@ host_t::host_t(std::vector<processor_t*>& procs)
   t.detach();
 }
 
-#define PUTCHAR_BASE	0x0
-#define GETCHAR_BASE	0x1000
+#define GETCHAR_BASE	0x0
+#define PUTCHAR_BASE	0x1000
 #define FINISH_BASE     0x2000
 
 void host_t::monitor()
